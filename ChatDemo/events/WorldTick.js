@@ -10,7 +10,7 @@ class WorldTick extends TEvent{
         // Resolve collisions
         //TODO resolution should be moved to another event and optimized to not rerun if event hash is same and inputs unchanged
         let player_ids = Object.keys(world.heartbeat);
-        
+
         for(let k=1;k<player_ids.length;k++){
             let player1 = timeline.get(player_ids[k]);
             if(!player1){
@@ -23,13 +23,13 @@ class WorldTick extends TEvent{
                 }
                 let p1top2 = [player2.x -player1.x, player2.y - player1.y];
                 let l = Math.sqrt(p1top2[0]*p1top2[0] + p1top2[1]*p1top2[1]);
-                if( l> 0 && l < Player.radius*2){ //collision
+                if( l> 0 && l < player1.radius + player2.radius){ //collision
                     //console.log(this.time + " = " + timeline.current_time);
-                    let n = (2*Player.radius - l)/ (2*l);
-                    player2.x += p1top2[0] * n;
-                    player2.y += p1top2[1] * n;
-                    player1.x -= p1top2[0] * n;
-                    player1.y -= p1top2[1] * n;
+                    if (player1.radius > player2.radius) {
+                        eat(player1, player2)
+                    } else {
+                        eat(player2, player1)
+                    }
                 }
             }
         }
@@ -46,8 +46,15 @@ class WorldTick extends TEvent{
         for(let k=0;k<to_remove.length;k++){
             delete world.heartbeat[to_remove[k]];
         }
-        
 
-        timeline.addEvent(new WorldTick({interval:this.parameters.interval}, this.time+this.parameters.interval));
+
+        timeline.addEvent(new WorldTick({ interval: this.parameters.interval }, this.time + this.parameters.interval));
+
+        function eat(biggerFish, smallerFish) {
+            biggerFish.radius += Math.sqrt(smallerFish.radius)
+            smallerFish.x = Math.random() * 1000
+            smallerFish.y = Math.random() * 1000
+            smallerFish.radius = 20
+        }
     }
 }

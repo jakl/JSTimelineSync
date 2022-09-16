@@ -10,12 +10,12 @@ class MovePlayer extends TEvent{
             let dx = player.tx - player.x;
             let dy = player.ty - player.y;
             let d = Math.sqrt(dx*dx + dy*dy);
-            if(d < Player.speed*this.parameters.interval){
+            if(d < player.speed*this.parameters.interval){
                 player.x = player.tx ;
                 player.y = player.ty ;
                 player.moving = false;
             }else{
-                let n = Player.speed*this.parameters.interval/d ;
+                let n = player.speed*this.parameters.interval/d ;
                 player.x += dx*n;
                 player.y += dy*n;
             }

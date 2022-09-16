@@ -71,9 +71,9 @@ function canvasApp() {
 	var mouse_down = false ;
 	//Which button is down (0 is left, 2 is right)
 	var mouse_button ;
-	
+
 	var interface_buttons = {}; // Map of from name to buttons currently on the interface.
-	
+
 	function init() {
 		setupGame();
 		theCanvas.addEventListener("mousedown", mouseDownListener, false);
@@ -94,7 +94,7 @@ function canvasApp() {
         }
         });
 	}
-	
+
 	function setupGame(){
         interface_buttons["latency_label"] = new InterfaceButton(theCanvas.width-200, 10, 200, 40, "ping:?", 20, "#FFFFFF", "#000000", "#000000", 3, null);
 
@@ -104,16 +104,18 @@ function canvasApp() {
         player.x = 200 ;
         player.y = 200 ;
         player.name = "Player " + my_id  ; // TODO let the player input this
+        player.radius = 35;
+        player.speed = 500;
         timeline.addObject(player, my_id, timeline.current_time+0.2) ;
         timeline.addEvent(new MovePlayer({player_id:my_id, interval:interval }, timeline.current_time + 0.5 ));
 	}
-	
-	
+
+
 	function drawScreen() {
 		//bg
 		context.fillStyle = "#000000";
 		context.fillRect(0,0,theCanvas.width,theCanvas.height);
-		
+
         interface_buttons["latency_label"].text = "ping:" + Math.round(timeline.ping*1000) +" ms";
 
 		// Draw any buttons currently on the interface.
@@ -130,17 +132,18 @@ function canvasApp() {
         timeline.setObservedOffset(delay, my_id);
         // Draw everything else slightly in the past to reduce visible rollbacks
         timeline.setObservedOffset(-delay*0.75);
-        
-        
+
+
         let IDs = timeline.getAllIDs() ; // TODO way to fetch things by groups?
 
         for(let id of IDs){
             let p = timeline.getObserved(id, true);
             if(p==null){
-                continue ; 
+                continue ;
             }
             if(p.constructor.name == "Player"){
-                drawCircle(p.x, p.y, Player.radius, player_fill, player_stroke,stroke_size);
+                debugger;
+                drawCircle(p.x, p.y, p.radius, player_fill, player_stroke,stroke_size);
             }
             if(p.constructor.name == "ChatLog"){
                 chat_id = id ;
@@ -151,14 +154,14 @@ function canvasApp() {
                 let chat_text = p.chat.join("<br>");
                 if(chat_text != last_chat_text){ // don't touch the DOM unless there's a change
                     let paragraph = document.getElementById("chat");
-                    paragraph.innerHTML = chat_text ;   
+                    paragraph.innerHTML = chat_text ;
                     last_chat_text = chat_text;
-                } 
+                }
             }
         }
-		
+
 	}
-	
+
     var last_tx=0;
     var last_ty=0;
 
@@ -177,7 +180,7 @@ function canvasApp() {
 
         // Advance time
         timeline.run();
-        
+
 		// Draw screen.
 		drawScreen();
         requestAnimationFrame(timeListener);
@@ -186,32 +189,32 @@ function canvasApp() {
     function timeListener2(){ // TODO terrible name
         // Advance time
         timeline.run();
-        
+
         if(timeline.current_time > last_heartbeat + 0.5){
             last_heartbeat = timeline.current_time ;
             timeline.addEvent(new Heartbeat({player_id:my_id}));
         }
     }
-	
+
 	function keyListener(evt) {
 		evt = evt || window.event;
 	    var key_code = evt.keyCode || evt.which;
 	    var character = String.fromCharCode(key_code); // This only works with letters. Unpredictable otherwise.
-	    
-        
+
+
         // TODO update chat line and submit on enter
 
         if(key_code == 37 ){ // Left
-	    	
+
 	    }else if(key_code == 38 ){// Up
             let me = timeline.getObserved(my_id);
 
 	    	console.log(me.serialize());
             console.log(me.hash());
 	    }else if(key_code == 39  ){// Right
-	    	
+
 	    }else if(key_code == 40 ){// Down
-	    	
+
             //console.log("Debug hash data:");
             //console.log(debug_hash_data);
             //let hash_data = timeline.getHashData(timeline.current_time - 1) ;
@@ -234,7 +237,7 @@ function canvasApp() {
             sendClicked();
         }
 	}
-	
+
 	function mouseDownListener(evt) {
 		var bRect = theCanvas.getBoundingClientRect();
 		mouse_down_x = (evt.clientX - bRect.left)*(theCanvas.width/bRect.width);
@@ -251,7 +254,7 @@ function canvasApp() {
             timeline.addEvent(new UpdatePlayerTarget({player_id:my_id, tx:tx, ty:ty})) ;
         }
 	}
-	
+
 	function mouseUpListener(evt) {
 		mouse_down = false ;
 		// Execute any buttons "clicked" (mouse up and down on the button)
@@ -263,20 +266,20 @@ function canvasApp() {
                 }
             }
         }
-		
+
         // Stop on mouse release
         timeline.addEvent(new UpdatePlayerTarget({player_id:my_id} )) ;
 	}
 
 	function mouseMoveListener(evt) {
-		//getting mouse position correctly 
+		//getting mouse position correctly
 		var bRect = theCanvas.getBoundingClientRect();
 		mouse_x = (evt.clientX - bRect.left)*(theCanvas.width/bRect.width);
 		mouse_y = (evt.clientY - bRect.top)*(theCanvas.height/bRect.height);
-		
-		
+
+
 	}
-	
+
 	// Draw a canvas line with a single call.
 	function drawLine(color, size, x1, y1, x2, y2){
 	    context.beginPath();
@@ -286,7 +289,7 @@ function canvasApp() {
 	    context.lineTo(x2, y2);
 	    context.stroke();
     }
-	
+
 	//Draw a canvas circle with a single call.
 	//Use null for fill or stroke color if you do not wish to draw that element.
 	function drawCircle(x, y, radius, fill_color, stroke_color, stroke_size){
@@ -302,8 +305,8 @@ function canvasApp() {
 			context.strokeStyle = stroke_color;
 			context.stroke();
 		}
-	}	
-	
+	}
+
 
 
 	init(); // Start the canvasApp.
